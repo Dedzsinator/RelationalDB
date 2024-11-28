@@ -6,9 +6,6 @@
 
 // Forward declaration
 template <typename Key, typename Value>
-class BPlusTree;
-
-template <typename Key, typename Value>
 class BPlusTreeNode {
 public:
     bool isLeaf;
@@ -37,7 +34,5 @@ private:
     void removeInternal(const Key& key, std::shared_ptr<BPlusTreeNode<Key, Value>> node);
     bool searchInternal(const Key& key, Value& value, std::shared_ptr<BPlusTreeNode<Key, Value>> node) const;
 };
-
-#include "bplustree.cpp"
 
 #endif // BPLUSTREE_H

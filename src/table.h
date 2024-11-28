@@ -13,6 +13,7 @@ public:
     void deleteRows(const std::string& condition);
     void saveToDisk();
     void loadFromDisk();
+    const std::vector<std::string>& getColumns() const;
 
 private:
     std::string name;

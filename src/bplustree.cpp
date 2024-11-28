@@ -19,6 +19,25 @@ void BPlusTree<Key, Value>::insert(const Key& key, const Value& value) {
 }
 
 template <typename Key, typename Value>
+void BPlusTree<Key, Value>::insertInternal(const Key& key, const Value& value, std::shared_ptr<BPlusTreeNode<Key, Value>> node, std::shared_ptr<BPlusTreeNode<Key, Value>> parent) {
+    if (node->isLeaf) {
+        auto it = std::lower_bound(node->keys.begin(), node->keys.end(), key);
+        node->keys.insert(it, key);
+        node->values.insert(node->values.begin() + (it - node->keys.begin()), value);
+    } else {
+        auto it = std::lower_bound(node->keys.begin(), node->keys.end(), key);
+        int index = it - node->keys.begin();
+        if (node->children[index]->keys.size() == 2 * degree - 1) {
+            splitChild(node, index);
+            if (key > node->keys[index]) {
+                index++;
+            }
+        }
+        insertInternal(key, value, node->children[index], node);
+    }
+}
+
+template <typename Key, typename Value>
 void BPlusTree<Key, Value>::remove(const Key& key) {
     removeInternal(key, root);
     if (!root->isLeaf && root->keys.empty()) {
@@ -158,4 +177,11 @@ bool BPlusTree<Key, Value>::searchInternal(const Key& key, Value& value, std::sh
     }
 }
 
-template class BPlusTree<int, int>; // Explicit instantiation for int key and value
+template <typename Key, typename Value>
+bool BPlusTree<Key, Value>::search(const Key& key, Value& value) const {
+    return searchInternal(key, value, root);
+}
+
+// Explicit instantiation for int key and value
+template class BPlusTree<int, int>;
+template class BPlusTree<int, std::string>;

@@ -2,36 +2,42 @@
 #include <iostream>
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 
 Table::Table(const std::string& name, const std::vector<std::string>& columns)
-    : name(name), columns(columns) {}
+    : name(name), columns(columns) {
+    // Optionally, print the columns for debugging
+    std::cout << "Table created with columns: ";
+    for (const auto& col : columns) {
+        std::cout << col << " ";
+    }
+    std::cout << std::endl;
+}
 
 void Table::insert(const std::vector<std::string>& values) {
     if (values.size() != columns.size()) {
-        std::cerr << "Error: Column count does not match value count.\n";
-        return;
+        throw std::runtime_error("Error: Number of values does not match number of columns.");
     }
     rows.push_back(values);
-    std::cout << "Row inserted.\n";
 }
 
-std::vector<std::vector<std::string>> Table::select(const std::vector<std::string>& columns) {
-    std::vector<std::vector<std::string>> result;
-    std::vector<int> columnIndices;
 
+std::vector<std::vector<std::string>> Table::select(const std::vector<std::string>& columns) {
+    // Find indices of the requested columns
+    std::vector<int> columnIndices;
     for (const auto& col : columns) {
         auto it = std::find(this->columns.begin(), this->columns.end(), col);
-        if (it != this->columns.end()) {
-            columnIndices.push_back(std::distance(this->columns.begin(), it));
-        } else {
-            std::cerr << "Error: Column " << col << " does not exist.\n";
-            return result;
+        if (it == this->columns.end()) {
+            throw std::runtime_error("Error: Column '" + col + "' does not exist.");
         }
+        columnIndices.push_back(std::distance(this->columns.begin(), it));
     }
 
+    // Extract rows with only the specified columns
+    std::vector<std::vector<std::string>> result;
     for (const auto& row : rows) {
         std::vector<std::string> selectedRow;
-        for (int index : columnIndices) {
+        for (const auto& index : columnIndices) {
             selectedRow.push_back(row[index]);
         }
         result.push_back(selectedRow);
@@ -40,25 +46,12 @@ std::vector<std::vector<std::string>> Table::select(const std::vector<std::strin
     return result;
 }
 
-void Table::update(const std::string& column, const std::string& value, const std::string& condition) {
-    auto it = std::find(columns.begin(), columns.end(), column);
-    if (it == columns.end()) {
-        std::cerr << "Error: Column " << column << " does not exist.\n";
-        return;
-    }
-    int columnIndex = std::distance(columns.begin(), it);
-
-    for (auto& row : rows) {
-        // Simplified: update all rows for demonstration purposes
-        row[columnIndex] = value;
-    }
-    std::cout << "Rows updated.\n";
+void update(const std::string& column, const std::string& value, const std::string& condition) {
+    // Implement update
 }
 
-void Table::deleteRows(const std::string& condition) {
-    // Simplified: delete all rows for demonstration purposes
-    rows.clear();
-    std::cout << "Rows deleted.\n";
+void deleteRows(const std::string& condition) {
+    // Implement delete
 }
 
 void Table::saveToDisk() {
@@ -67,13 +60,11 @@ void Table::saveToDisk() {
         std::cerr << "Error: Could not open file for writing.\n";
         return;
     }
-
     // Write columns
     for (const auto& column : columns) {
         file << column << ",";
     }
     file << "\n";
-
     // Write rows
     for (const auto& row : rows) {
         for (const auto& value : row) {
@@ -81,9 +72,12 @@ void Table::saveToDisk() {
         }
         file << "\n";
     }
-
     file.close();
     std::cout << "Table saved to disk.\n";
+}
+
+const std::vector<std::string>& Table::getColumns() const {
+    return columns;
 }
 
 void Table::loadFromDisk() {
@@ -92,10 +86,8 @@ void Table::loadFromDisk() {
         std::cerr << "Error: Could not open file for reading.\n";
         return;
     }
-
     columns.clear();
     rows.clear();
-
     std::string line;
     // Read columns
     if (std::getline(file, line)) {
@@ -107,7 +99,6 @@ void Table::loadFromDisk() {
             }
         }
     }
-
     // Read rows
     while (std::getline(file, line)) {
         std::istringstream ss(line);
@@ -122,7 +113,6 @@ void Table::loadFromDisk() {
             rows.push_back(row);
         }
     }
-
     file.close();
     std::cout << "Table loaded from disk.\n";
 }

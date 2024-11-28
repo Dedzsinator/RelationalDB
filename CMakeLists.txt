@@ -12,10 +12,10 @@ add_executable(mydb_daemon
 )
 
 # Add the test executables
+add_executable(test_bplustree src/tests/test_bplustree.cpp src/bplustree.cpp)
 add_executable(test_sqlinterpreter src/tests/test_sqlinterpreter.cpp src/sql_interpreter.cpp src/database.cpp src/table.cpp)
 add_executable(test_server src/tests/test_server.cpp src/server.cpp)
 add_executable(test_transaction src/tests/test_transaction.cpp src/transaction.cpp)
-add_executable(test_bplustree src/tests/test_bplustree.cpp src/bplustree.cpp)
 add_executable(test_table src/tests/test_table.cpp src/table.cpp)
 
 # Add custom targets for running the tests
